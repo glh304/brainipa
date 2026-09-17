@@ -3,11 +3,20 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Brain IPA - Halaman Beranda</title>
+<meta name="theme-color" content="#060B18">
+<meta name="description" content="Brain IPA - Media pembelajaran interaktif sistem organ manusia untuk siswa SMP kelas VIII">
+<title>Brain IPA - Splashscreen</title>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" href="assets/images/icon.png">
+<link rel="apple-touch-icon" href="assets/images/icon.png">
+<!-- Preload halaman dan resource berikutnya -->
+<link rel="prefetch" href="indexhome.html">
+<link rel="prefetch" href="menu-materi.html">
+<link rel="prefetch" href="app.js">
 </head>
-<body data-page-id="page-home" data-page-label="Halaman Beranda" data-splash="true">
+<body data-page-id="page-splash" data-page-label="Splashscreen" data-splash="true">
 
 <!-- ===== SPLASH SCREEN ===== -->
 <div id="splash-screen">
@@ -25,38 +34,82 @@
       <div class="splash-chip">📚 5 Materi</div>
       <div class="splash-chip">🎮 5 Game</div>
       <div class="splash-chip">📝 10 Kuis</div>
+      <div class="splash-chip">🎓 Sertifikat</div>
     </div>
     <div class="splash-bar-wrap">
       <div class="splash-bar" id="splash-bar"></div>
     </div>
     <div class="splash-loading-text" id="splash-loading-text">Memuat materi...</div>
+    <button class="splash-skip-btn" id="splash-skip-btn" onclick="skipSplash(event)" title="Lewati animasi intro">Lewati ➔</button>
   </div>
 </div>
 
-<div class="page active" id="page-home">
-  <button class="home-darkmode-btn" onclick="toggleDarkMode()" id="home-dark-btn" title="Toggle Dark Mode">🌙</button>
-  <div class="home-content">
-    <div class="home-logo">🧠</div>
-    <h1 class="home-title">Brain IPA</h1>
-    <p class="home-subtitle">Media pembelajaran interaktif sistem organ manusia untuk siswa SMP kelas VIII</p>
-    <div class="floating-icons">
-      <div class="floating-icon no-hover"><span class="icon">🫀</span>Peredaran</div>
-      <div class="floating-icon no-hover"><span class="icon">🫁</span>Pernapasan</div>
-      <div class="floating-icon no-hover"><span class="icon">🧪</span>Ekskresi</div>
-      <div class="floating-icon no-hover"><span class="icon">🥗</span>Pencernaan</div>
-    </div>
-    <button class="btn-primary" onclick="mulaiNarasi()">
-      ▶ Mulai Belajar
-    </button>
-    <br>
-    <button class="btn-dev" onclick="location.href='pengembang.html'">
-      👨‍💻 Pengembang
-    </button>
-  </div>
-</div>
+<script>
+document.body.classList.add('splash-active');
 
-<div class="page-debug-label" id="page-debug-label">Halaman Beranda</div>
+const steps = [
+  { pct: 15, text: 'Memuat materi...' },
+  { pct: 38, text: 'Menyiapkan animasi...' },
+  { pct: 62, text: 'Memuat permainan...' },
+  { pct: 85, text: 'Hampir selesai...' },
+  { pct: 100, text: 'Siap! 🎉' },
+];
 
-<script src="app.js"></script>
+const bar = document.getElementById('splash-bar');
+const loadingText = document.getElementById('splash-loading-text');
+const splash = document.getElementById('splash-screen');
+let step = 0;
+let isRedirecting = false;
+
+function redirectToHome() {
+  if (isRedirecting) return;
+  isRedirecting = true;
+  if (splash) splash.classList.add('splash-hide');
+  document.body.classList.remove('splash-active');
+  setTimeout(() => {
+    window.location.replace('indexhome.html');
+  }, 450);
+}
+
+function skipSplash(e) {
+  if (e) e.stopPropagation();
+  redirectToHome();
+}
+
+// Izinkan klik di area splash screen untuk lewati loading
+if (splash) {
+  splash.addEventListener('click', (e) => {
+    redirectToHome();
+  });
+}
+
+function nextSplashStep() {
+  if (isRedirecting) return;
+
+  if (step >= steps.length) {
+    setTimeout(redirectToHome, 400);
+    return;
+  }
+
+  const currentStep = steps[step++];
+  if (bar) {
+    bar.style.width = currentStep.pct + '%';
+    bar.classList.add('active');
+  }
+  if (loadingText) {
+    loadingText.style.opacity = '0';
+    setTimeout(() => {
+      loadingText.textContent = currentStep.text;
+      loadingText.style.opacity = '1';
+    }, 150);
+  }
+
+  const delay = step === steps.length ? 450 : 280 + Math.random() * 200;
+  setTimeout(nextSplashStep, delay);
+}
+
+setTimeout(nextSplashStep, 250);
+setTimeout(redirectToHome, 5000);
+</script>
 </body>
 </html>
